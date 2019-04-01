@@ -11,9 +11,9 @@ RUN apt-get update && \
     apt-get clean
 
 RUN curl -sL https://ibm.biz/idt-installer | bash
-RUN ibmcloud plugin install container-registry && \
-    ibmcloud plugin install container-service && \
-    ibmcloud plugin list
+RUN ibmcloud plugin install -f container-registry
+RUN ibmcloud plugin install -f container-service
+RUN ibmcloud plugin list
 
 RUN groupadd -g 10000 devops && useradd -u 10000 -g 10000 -G sudo -d /home/devops -m devops
 RUN usermod --password $(echo password | openssl passwd -1 -stdin) devops
