@@ -1,0 +1,11 @@
+{
+  "name": "ibmcloud-dev",
+  "version": "0.0.1",
+  "description": "Docker image for IBM Cloud builds",
+  "main": "index.js",
+  "scripts": {
+    "docker:push": "./scripts/publish.sh \"$npm_package_name\" \"$npm_package_version\""
+  },
+  "author": "",
+  "license": "ISC"
+}
