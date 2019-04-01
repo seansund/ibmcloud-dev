@@ -14,6 +14,8 @@ RUN curl -sL https://ibm.biz/idt-installer | bash
 RUN ibmcloud plugin list
 
 RUN groupadd -g 10000 pipeline && useradd -u 10000 -g 10000 -G sudo -d /home/pipeline -m pipeline
+RUN usermod --password $(echo password | openssl passwd -1 -stdin) pipeline
+RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER pipeline
 WORKDIR /home/pipeline
