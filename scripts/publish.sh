@@ -29,7 +29,7 @@ if [[ -n $(docker image ls ${REGISTRY_NAME}/${IMAGE_NAME}:${IMAGE_VER}) ]]; then
     echo -e "You chose to \033[1;31moverwrite\033[0m, proceeding with push"
   else
     echo -e "Exiting... Run \033[1;32mnpm version [option]\033[0m to update the version and initiate the push"
-    exit 1
+    exit 0
   fi
 fi
 
