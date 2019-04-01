@@ -13,12 +13,12 @@ RUN apt-get update && \
 RUN curl -sL https://ibm.biz/idt-installer | bash
 RUN ibmcloud plugin list
 
-RUN groupadd -g 10000 pipeline && useradd -u 10000 -g 10000 -G sudo -d /home/pipeline -m pipeline
-RUN usermod --password $(echo password | openssl passwd -1 -stdin) pipeline
+RUN groupadd -g 10000 devops && useradd -u 10000 -g 10000 -G sudo -d /home/devops -m devops
+RUN usermod --password $(echo password | openssl passwd -1 -stdin) devops
 RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-USER pipeline
-WORKDIR /home/pipeline
+USER devops
+WORKDIR /home/devops
 
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 
