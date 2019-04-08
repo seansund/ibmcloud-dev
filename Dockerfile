@@ -4,6 +4,7 @@ RUN apt-get update && \
     apt-get install -y apt-utils && \
     apt-get install -y apt-transport-https && \
     apt-get install -y gnupg gnupg2 gnupg1 && \
+    apt-get install -y build-essential && \
     apt-get install -y sudo && \
     apt-get install -y python && \
     apt-get install -y curl && \
@@ -17,7 +18,7 @@ RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudo
 USER devops
 WORKDIR /home/devops
 
-RUN curl -sL https://ibm.biz/idt-installer | bash
+RUN curl -sL https://ibm.biz/idt-installer | bash && ibmcloud config --check-version=false
 
 RUN sudo usermod -aG docker devops
 
