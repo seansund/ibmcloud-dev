@@ -1,2 +1,4 @@
 .idea/
 *.iml
+.kubeconfig
+node_modules/

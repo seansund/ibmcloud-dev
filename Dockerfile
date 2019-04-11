@@ -1,7 +1,6 @@
 FROM debian:stretch-slim
 
 RUN apt-get update && \
-    apt-get install -y apt-utils && \
     apt-get install -y apt-transport-https && \
     apt-get install -y gnupg gnupg2 gnupg1 && \
     apt-get install -y build-essential && \
@@ -22,8 +21,11 @@ RUN curl -sL https://ibm.biz/idt-installer | bash && ibmcloud config --check-ver
 
 RUN sudo usermod -aG docker devops
 
+RUN mkdir /home/devops/bin && \
+    echo 'export PATH=$PATH:/home/devops/bin' >> /home/devops/.bash_profile && \
+    echo '. /home/devops/.bash_profile' >> /home/devops/.bashrc
+
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash && \
-    echo 'export NVM_DIR="${HOME}/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> ~/.bash_profile
+    echo 'export NVM_DIR="/home/devops/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /home/devops/.bash_profile
 
-RUN . ~/.bash_profile && nvm install 11.12.0 && nvm use 11.12.0
-
+RUN . /home/devops/.bash_profile && nvm install 11.12.0 && nvm use 11.12.0
