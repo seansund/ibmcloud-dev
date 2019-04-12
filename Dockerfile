@@ -16,58 +16,34 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && \
     apt-get install -y --no-install-recommends yarn && \
     apt-get clean
 
+# Configure sudoers so that sudo can be used without a password
+RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create devops user
+RUN groupadd -g 10000 devops && \
+    useradd -u 10000 -g 10000 -G sudo -d /home/devops -m devops && \
+    usermod --password $(echo password | openssl passwd -1 -stdin) devops
+
+USER devops
+WORKDIR /home/devops
+
 # Install the ibmcloud cli
 RUN curl -sL https://ibm.biz/idt-installer | bash && \
     ibmcloud config --check-version=false
 
-# Move the ibmcloud plugins from /root to /usr/local/ibmcloud-plugins and
-# set them up so all users can access the plugins
-RUN groupadd ibmcloud && \
-    usermod -aG docker,ibmcloud root && \
-    mv /root/.bluemix/plugins /usr/local/ibmcloud-plugins && \
-    ln -s /usr/local/ibmcloud-plugins /root/.bluemix/plugins && \
-    chown -R :ibmcloud /usr/local/ibmcloud-plugins && \
-    chmod -R g+rwxs /usr/local/ibmcloud-plugins && \
-    mkdir /etc/skel/.bluemix && \
-    ln -s /usr/local/ibmcloud-plugins /etc/skel/.bluemix/plugins
+# Add the devops user to the docker group
+RUN sudo usermod -aG docker devops
 
-# Install nvm into /opt/nvm under the nvm group
-RUN groupadd nvm && \
-    usermod -aG nvm root && \
-    mkdir /opt/nvm && \
-    git clone https://github.com/creationix/nvm.git /opt/nvm && \
-    mkdir -p /opt/nvm/.cache && \
-    mkdir -p /opt/nvm/versions && \
-    mkdir -p /opt/nvm/alias && \
-    chown -R :nvm /opt/nvm && \
-    chmod -R g+ws /opt/nvm
+# Install nvm
+RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 
-RUN echo 'export NVM_DIR="/opt/nvm"' > /etc/profile.d/nvm-home.sh && \
-    echo '[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"' >> /etc/profile.d/nvm-home.sh && \
-    echo '[ -s "${NVM_DIR}/bash_completion" ] && . "${NVM_DIR}/bash_completion"' >> /etc/profile.d/nvm-home.sh
+RUN echo 'echo "Initializing environment..."' > /home/devops/.bashrc-ni && \
+    echo 'export NVM_DIR="${HOME}/.nvm"' >> /home/devops/.bashrc-ni && \
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/devops/.bashrc-ni
 
-RUN . /etc/profile.d/nvm-home.sh && nvm install 11.12.0 && nvm use 11.12.0
+# Set the BASH_ENV to /home/devops/.bashrc-ni so that it is executed in a
+# non-interactive shell
+ENV BASH_ENV /home/devops/.bashrc-ni
 
-# Create a new version of /etc/bash.bashrc with nvm setup at the top (so that it is
-# executed in non-login shell)
-RUN cat /etc/profile.d/nvm-home.sh > ./bash.bashrc.tmp && \
-    cat /etc/bash.bashrc >> ./bash.bashrc.tmp && \
-    rm /etc/bash.bashrc && \
-    mv ./bash.bashrc.tmp /etc/bash.bashrc
-
-# Set the BASH_ENV to /etc/bash.bashrc so that it is executed in a non-interactive
-# shell
-ENV BASH_ENV /etc/bash.bashrc
-
-# Create devops and pipeline users
-RUN groupadd -g 10000 devops && \
-    useradd -u 10000 -g 10000 -G sudo,nvm,docker,ibmcloud -d /home/devops -m devops && \
-    usermod --password $(echo password | openssl passwd -1 -stdin) devops
-RUN useradd -u 1000 -G sudo,nvm,docker,ibmcloud -d /home/pipeline -m pipeline && \
-    usermod --password $(echo password | openssl passwd -1 -stdin) pipeline
-
-# Configure sudoers so that sudo can be used without a password
-RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-USER devops
-WORKDIR /home/devops
+# Pre-install node v11.12.0
+RUN . /home/devops/.bashrc-ni && nvm install v11.12.0 && nvm use v11.12.0
