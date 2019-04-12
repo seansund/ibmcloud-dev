@@ -9,13 +9,6 @@ RUN apt-get update && \
     apt-get install -y python && \
     apt-get install -y curl
 
-# Install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends yarn && \
-    apt-get clean
-
 # Configure sudoers so that sudo can be used without a password
 RUN chmod u+w /etc/sudoers && echo "%sudo   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
