@@ -40,3 +40,5 @@ ENV BASH_ENV /home/devops/.bashrc-ni
 
 # Pre-install node v11.12.0
 RUN . /home/devops/.bashrc-ni && nvm install v11.12.0 && nvm use v11.12.0
+
+RUN sudo apt-get install -y jq
